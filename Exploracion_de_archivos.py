@@ -8,7 +8,6 @@ Created on %(date)s
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 from inline_sql import sql, sql_val
 # importamos el modulo pyplot, y lo llamamos plt
 import matplotlib.pyplot as plt
@@ -83,4 +82,87 @@ for cod, prenda in zip(codigos, prendas):
     print("De " + prenda + " hay cargadas:" ,  dataset_prenda.shape[0])
 
 #hay la misma cantidad cantidad de cada uno
+
+
+
+#creo un diccionario que guarda por separado las imagenes de cada tipo
+    
+book_fotos = {}
+for cod in codigos:
+    book_fotos[cod] = dataset[dataset["label"] == cod].drop(columns = ["label"])
+
+
+#analizo la promedio de intensidad de un pixel en todo un tipo de prendas
+fig, axs = plt.subplots(nrows=2, ncols=5, figsize=(10, 10),
+                        subplot_kw={'xticks': [], 'yticks': []})
+
+codigos = cod_prendas["Codigo"].array.to_numpy().reshape(10)
+prendas = cod_prendas["Tipo De Prenda"].array.to_numpy().reshape(10)
+
+
+for ax, cod, prenda in zip(axs.flat, codigos, prendas):
+    ax.set_title(str(prenda))
+    dataset_prenda =book_fotos[cod]
+    primera_fila = dataset_prenda.mean().to_numpy()
+    primera_imagen = primera_fila.reshape([28,28])
+    ax.imshow(primera_imagen)
+    
+fig.show()
+
+#el maximo
+fig, axs = plt.subplots(nrows=2, ncols=5, figsize=(10, 10),
+                        subplot_kw={'xticks': [], 'yticks': []})
+
+codigos = cod_prendas["Codigo"].array.to_numpy().reshape(10)
+prendas = cod_prendas["Tipo De Prenda"].array.to_numpy().reshape(10)
+
+
+for ax, cod, prenda in zip(axs.flat, codigos, prendas):
+    ax.set_title(str(prenda))
+    dataset_prenda =book_fotos[cod]
+    primera_fila = dataset_prenda.max().to_numpy()
+    primera_imagen = primera_fila.reshape([28,28])
+    ax.imshow(primera_imagen)
+    
+fig.show()
+
+#el minimo
+fig, axs = plt.subplots(nrows=2, ncols=5, figsize=(10, 10),
+                        subplot_kw={'xticks': [], 'yticks': []})
+
+codigos = cod_prendas["Codigo"].array.to_numpy().reshape(10)
+prendas = cod_prendas["Tipo De Prenda"].array.to_numpy().reshape(10)
+
+
+for ax, cod, prenda in zip(axs.flat, codigos, prendas):
+    ax.set_title(str(prenda))
+    dataset_prenda =book_fotos[cod]
+    primera_fila = dataset_prenda.min().to_numpy()
+    primera_imagen = primera_fila.reshape([28,28])
+    ax.imshow(primera_imagen)
+    
+fig.show()
+
+#del caso del maximo de aparicion, entre todas las prendas puedo eliminar 
+#los casos que nunca se utiliza a un pixel (si su valor maximo entre todas
+#las fotos es 0 entonces nunca se utiliza y no aporta informacion)
+
+
+maximos_prendas = dataset.max().array.to_numpy()[1:].reshape([28,28])
+plt.matshow(maximos_prendas)
+plt.title("Maxima intensidad prendas")
+
+minimo_prendas = dataset.min().array.to_numpy()[1:].reshape([28,28])
+plt.matshow(maximos_prendas)
+plt.title("minima intensidad prendas")
+
+promedio_prendas = dataset.mean().array.to_numpy()[1:].reshape([28,28])
+plt.matshow(promedio_prendas)
+plt.title("promedia intensidad prendas")
+
+
+media_prendas = dataset.median().array.to_numpy()[1:].reshape([28,28])
+plt.matshow(media_prendas)
+plt.title("media intensidad prendas")
+
 
