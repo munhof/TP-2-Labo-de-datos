@@ -127,7 +127,7 @@ for ax, cod, prenda in zip(axs.flat, codigos, prendas):
 fig.show()
 
 #el minimo
-fig, axs = plt.subplots(nrows=2, ncols=5, figsize=(10, 10),
+fig, axs = plt.subplots(nrows=10, ncols=4, figsize=(10, 10),
                         subplot_kw={'xticks': [], 'yticks': []})
 
 codigos = cod_prendas["Codigo"].array.to_numpy().reshape(10)
@@ -153,7 +153,7 @@ plt.matshow(maximos_prendas)
 plt.title("Maxima intensidad prendas")
 
 minimo_prendas = dataset.min().array.to_numpy()[1:].reshape([28,28])
-plt.matshow(maximos_prendas)
+plt.matshow(minimo_prendas)
 plt.title("minima intensidad prendas")
 
 promedio_prendas = dataset.mean().array.to_numpy()[1:].reshape([28,28])
@@ -165,4 +165,33 @@ media_prendas = dataset.median().array.to_numpy()[1:].reshape([28,28])
 plt.matshow(media_prendas)
 plt.title("media intensidad prendas")
 
+desviacion_pix = dataset.std().array.to_numpy()[1:].reshape([28,28])
+plt.matshow(desviacion_pix)
+plt.title("std intensidad prendas")
 
+#grafico de la media,moda,std y maximo de cada prenda
+
+fig, axs = plt.subplots(nrows=10, ncols=4, figsize=(10, 10),
+                        subplot_kw={'xticks': [], 'yticks': []})
+
+
+
+codigos = cod_prendas["Codigo"].array.to_numpy().reshape(10)
+prendas = cod_prendas["Tipo De Prenda"].array.to_numpy().reshape(10)
+grfico_title = ["media","moda","std","maximo"]
+
+for i in range(10):
+    dataset_prenda = book_fotos[i]
+    dataset_prenda.head()
+    for j in range(4):
+        axs[i,j].set_title(str(prendas[i] + grfico_title[j]))
+        if j == 0:
+            primera_fila = dataset_prenda.mean().to_numpy()
+        elif j == 1:
+            primera_fila = dataset_prenda.median().to_numpy()
+        elif j == 2:
+            primera_fila = dataset_prenda.std().to_numpy()
+        else:
+            primera_fila = dataset_prenda.max().to_numpy()
+        primera_imagen = primera_fila.reshape([28,28])
+        axs[i,j].imshow(primera_imagen)
