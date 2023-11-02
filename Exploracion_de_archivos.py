@@ -195,3 +195,24 @@ for i in range(10):
             primera_fila = dataset_prenda.max().to_numpy()
         primera_imagen = primera_fila.reshape([28,28])
         axs[i,j].imshow(primera_imagen)
+
+# muestro los puntos de interés para determinar si es una camiseta o un pantalón
+
+# grafico el promedio de las camisetas
+dataset_shirt = book_fotos[0]
+prom_shirt = dataset_shirt.mean().to_numpy()
+imagen_prom_shirt = prom_shirt.reshape([28,28])
+plt.matshow(imagen_prom_shirt)
+
+# grafico el promedio de los pantalones
+dataset_trouser = book_fotos[1]
+desvio_trouser = dataset_trouser.mean().to_numpy()
+primera_imagen = desvio_trouser.reshape([28,28])
+plt.matshow(primera_imagen)
+
+# grafico la diferencia absoluta entre el prom. de las dos imágenes
+# esto me muestra las zonas de que más diferencian una camiseta de un pantalón
+prom_shirt_trouser = prom_shirt-desvio_trouser
+desvio = np.absolute(prom_shirt_trouser)
+imagen_desvio_st = desvio.reshape([28,28])
+plt.matshow(imagen_desvio_st)
