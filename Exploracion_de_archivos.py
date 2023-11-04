@@ -196,3 +196,25 @@ for i in range(10):
         primera_imagen = primera_fila.reshape([28,28])
         axs[i,j].imshow(primera_imagen)
 
+
+
+# Analizo la variabilidad de los datos dentro de cada clase y las comparo entre si.
+
+desviaciones = np.ones(10)  # Placeholder
+
+for i in range (10):
+    desviacion_total_por_clase = dataset[dataset['label'] == i ].std().array.to_numpy()[1:].sum()
+    # Agarro una clase, calculo la desviacion de cada columna y luego sumo las columnas.
+    desviaciones[i] = desviacion_total_por_clase
+
+desviacion_minima = np.min(desviaciones)
+desviacion_normalizada = desviaciones/desviacion_minima # Por esto use array, para poder normalizar facilmente.
+
+nombre_de_prendas = np.array(cod_prendas['Tipo De Prenda'])
+dataset = pd.DataFrame({'nombre_de_prendas': nombre_de_prendas, 'desviacion_normalizada': list(desviacion_normalizada)}, columns=['nombre_de_prendas', 'desviacion_normalizada'])
+dataset = dataset.sort_values('desviacion_normalizada')
+sns.scatterplot(data = dataset , y = 'nombre_de_prendas', x = 'desviacion_normalizada').set(title = 'Variabilidad normalizada de los datos de cada clase')
+plt.show()
+plt.close()
+# Con esta metrica la variabilidad entre los vestidos es alrededor de un 33% mas grande que entre sneakers, 
+# que son los que menos variabilidad tienen.
