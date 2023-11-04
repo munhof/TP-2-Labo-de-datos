@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from inline_sql import sql, sql_val
 # importamos el modulo pyplot, y lo llamamos plt
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 #configuracion necesaria de pyplot para ver las imagenes en escala de grises
 plt.rcParams['image.cmap'] = 'gray'
