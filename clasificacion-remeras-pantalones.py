@@ -21,7 +21,7 @@ plt.rcParams['image.cmap'] = 'gray'
 dataset = pd.read_csv("fashion-mnist.csv")
 cod_prendas = pd.read_csv("cod-prendas.csv")
 
-# grafico el promedio de las camisetas
+# grafico el promedio de las remeras
 dataset_shirt = book_fotos[0]
 prom_shirt = dataset_shirt.mean().to_numpy()
 imagen_prom_shirt = prom_shirt.reshape([28,28])
@@ -33,8 +33,8 @@ prom_trouser = dataset_trouser.mean().to_numpy()
 imagen_prom_trouser = prom_trouser.reshape([28,28])
 plt.matshow(imagen_prom_trouser)
 
-# grafico la diferencia absoluta entre el prom. de las dos imágenes
-# esto me muestra las zonas de que más diferencian una camiseta de un pantalón
+# grafico la diferencia absoluta entre el prom. de las dos imagenes
+# esto me muestra las zonas de que mas diferencian una remeras de un pantalón
 prom_shirt_trouser = prom_shirt-prom_trouser
 promedio_shirt_trouser = np.absolute(prom_shirt_trouser)
 imagen_prom_st = promedio_shirt_trouser.reshape([28,28])
@@ -42,14 +42,14 @@ plt.matshow(imagen_prom_st)
 
 
 # Creo un dataframe con los datos de remeras y pantalones
-dataPoleras = dataset[dataset['label']==0]
+dataRemeras = dataset[dataset['label']==0]
 dataPantalones = dataset[dataset['label']==1]
-dataPolPant = pd.concat([dataPoleras,dataPantalones])
+dataRemPant = pd.concat([dataRemeras,dataPantalones])
 
 #Verifico que esten balanceados
-dataPoleras.info()
+dataRemeras.info()
 dataPantalones.info()
-dataPolPant.info()
+dataRemPant.info()
 
 # Selecciono los pixeles de interes
 print(promedio_shirt_trouser.max())
@@ -66,8 +66,8 @@ def transfromadorBrazoOmbligo(data):
     data = pd.DataFrame(data[['label','pixeles_brazos','pixeles_ombligo']])
     return data
 
-dataPolerasPantalones = transfromadorBrazoOmbligo(dataPolPant)
+dataRemerasPantalones = transfromadorBrazoOmbligo(dataRemPant)
 
 
 # Grafico las prendas
-sns.scatterplot(data = dataPolerasPantalones, x= 'pixeles_brazos', y = 'pixeles_ombligo', hue='label')
+sns.scatterplot(data = dataRemerasPantalones, x= 'pixeles_brazos', y = 'pixeles_ombligo', hue='label')
