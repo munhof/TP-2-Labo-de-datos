@@ -4,7 +4,7 @@ Created on %(date)s
 
 @author: %(Facundo Munho)s
 """
-from Limpieza_de_datos import book_fotos
+import Limpieza_de_datos
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,16 +18,16 @@ plt.rcParams['image.cmap'] = 'gray'
 #importo el data set
 cod_prendas = pd.read_csv("./Dataset-original/cod-prendas.csv")
 
-book_fotos = book_fotos()
+book_fotos = Limpieza_de_datos.book_fotos()
 # grafico el promedio de las remeras
 dataset_shirt = book_fotos[0]
-prom_shirt = dataset_shirt.mean().to_numpy()
+prom_shirt = dataset_shirt.drop(columns = 'label').mean().to_numpy()
 imagen_prom_shirt = prom_shirt.reshape([28,28])
 plt.matshow(imagen_prom_shirt)
 
 # grafico el promedio de los pantalones
 dataset_trouser = book_fotos[1]
-prom_trouser = dataset_trouser.mean().to_numpy()
+prom_trouser = dataset_trouser.drop(columns = 'label').mean().to_numpy()
 imagen_prom_trouser = prom_trouser.reshape([28,28])
 plt.matshow(imagen_prom_trouser)
 
