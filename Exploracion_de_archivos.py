@@ -1,16 +1,26 @@
 # -*- coding: utf-8 -*-
 """
-Created on %(date)s
-
-@author: %(Facundo Munho)s
+Trabajo Practico 2
+Alumnos:
+    Munho Vital Facundo Nicolas
+    Cáceres Blanco Juan Manuel
+    Pavez Cayupe Richard Arturo
+Grupo:
+    Club penguin
+Materia:
+    Labo De Datos
+Cuatrimestre y año:
+    2c 2023
+Departamento a cargo:
+    DC
+    
+Exploracion de datos
 """
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from inline_sql import sql, sql_val
 # importamos el modulo pyplot, y lo llamamos plt
-import matplotlib.pyplot as plt
 import seaborn as sns
 
 # configuracion necesaria de pyplot para ver las imagenes en escala de grises
@@ -230,7 +240,7 @@ for i in range(10):
         axs[j].imshow(imagen)
     plt.show()
     plt.savefig("./figuras-exploracion-de-datos/medidas-resumen-intensidad-por-prenda-"+ prendas[i] + ".png")
-plt.close()
+    plt.close()
 del i, j, axs, fig, data_imagen, imagen,grafico_title, dataset_prenda, codigos, prendas
 
 # %%
@@ -264,3 +274,5 @@ plt.savefig("./figuras-exploracion-de-datos/variabilidad-de-prendas.png")
 plt.close()
 # Con esta metrica la variabilidad entre los vestidos es alrededor de un 33% mas grande que entre sneakers,
 # que son los que menos variabilidad tienen.
+del i,desviaciones,desviacion_maxima,desviacion_normalizada,
+del nombre_de_prendas,desviaciones_por_prendas,fig,desviacion_total_por_clase
