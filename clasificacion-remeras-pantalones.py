@@ -4,13 +4,11 @@ Created on %(date)s
 
 @author: %(Facundo Munho)s
 """
-from Exploracion_de_archivos import book_fotos
+from Limpieza_de_datos import book_fotos
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from inline_sql import sql, sql_val
 # importamos el modulo pyplot, y lo llamamos plt
-import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 import seaborn as sns
@@ -18,9 +16,9 @@ import seaborn as sns
 plt.rcParams['image.cmap'] = 'gray'
 
 #importo el data set
-dataset = pd.read_csv("fashion-mnist.csv")
-cod_prendas = pd.read_csv("cod-prendas.csv")
+cod_prendas = pd.read_csv("./Dataset-original/cod-prendas.csv")
 
+book_fotos = book_fotos()
 # grafico el promedio de las remeras
 dataset_shirt = book_fotos[0]
 prom_shirt = dataset_shirt.mean().to_numpy()
@@ -42,8 +40,8 @@ plt.matshow(imagen_prom_st)
 
 
 # Creo un dataframe con los datos de remeras y pantalones
-dataRemeras = dataset[dataset['label']==0]
-dataPantalones = dataset[dataset['label']==1]
+dataRemeras = book_fotos[0]
+dataPantalones = book_fotos[1]
 dataRemPant = pd.concat([dataRemeras,dataPantalones])
 
 #Verifico que esten balanceados
@@ -70,4 +68,4 @@ dataRemerasPantalones = transfromadorBrazoOmbligo(dataRemPant)
 
 
 # Grafico las prendas
-sns.scatterplot(data = dataRemerasPantalones, x= 'pixeles_brazos', y = 'pixeles_ombligo', hue='label')
+sns.scatterplot(data = dataRemerasPantalones, x= 'pixeles_brazos', y = 'pixeles_ombligo',hue = 'label')

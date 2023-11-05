@@ -181,9 +181,15 @@ def prendas_arquetipicas():
     global dataset
     arquetipos = {}
     for i in range(10):
-        arquetipos[i] = dataset[dataset["label"] == i].drop(columns = "label").median()
+        arquetipos[i] = dataset[dataset["label"] == i].drop(columns = "label").mean()
     return arquetipos
 
+def book_fotos():
+    global dataset
+    book_fotos = {}
+    for cod in range(10):
+        book_fotos[cod] = dataset[dataset["label"] == cod]
+    return book_fotos
 
 
 
