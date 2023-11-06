@@ -22,6 +22,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
+
 import Limpieza_de_datos
 
 #en este codigo vamos a probar varios metodos de ajuste con knn con el cual
@@ -76,6 +80,8 @@ sns.scatterplot(data = data_pantalon_remera, y = "label", x = "distancia remera"
                 hue = "label")
 plt.title("label vs distancia remera")
 plt.show()
+
+del distancia_pantalon, distancia_remera, data_pantalon_remera
 
 #vemos que hay dos grandes regiones donde tiene sentido realizar la clasificacion
 #con esta metrica, veamos que pasa con knn
@@ -139,4 +145,51 @@ axs[1] = sns.scatterplot(data = data_test_modelo, x = "distancia remera", y = "d
 axs[1].set_title("distribucion datos modelo")
 fig.suptitle("Modelo de clasficiacion de KNN por \n distancia arquetipos")
 
+#borro las varibales
+del fig,axs,data_test_modelo,data_test,knn_distancia,x_test,x_train,
+del pantalon_arquetipo, remera_arquetipo
+del distancia_pantalon, distancia_remera
 #ahora comprobemos como se comporta el modelo variando el hyper parametro n_neighbors
+
+X = pd.concat([X_train,X_test])
+y = pd.concat([y_train,y_test])
+
+#armo una lista de parametros, en este caso distruidos con la secuencia de fibonacci
+n = 145  # Reemplaza 10 con el valor deseado de 'n'
+fibonacci = [0,1]
+fibonacci = [fibonacci[i - 1] + fibonacci[i - 2] for i in range(2, n) if (fibonacci := fibonacci + [fibonacci[-1] + fibonacci[-2]])[-1] < n]
+
+#defino hyperparametros
+hyper_params = {'n_neighbors': fibonacci}
+
+#defino el modelo
+knn_distancia = KNeighborsClassifier()
+
+clf = GridSearchCV(knn_distancia, hyper_params,cv = 30)
+search = clf.fit(X[["distancia remera","distancia pantalon"]], y)
+# lo mejores parametros encontrados son:
+print(f"mejor parametro {search.best_params_}")
+print(f"mejor score {search.best_score_}")
+#sin embargo verifico la performance de cada uno para ver como se comporta
+
+knn_distancia = KNeighborsClassifier()
+score_best = []
+score_worse = []
+score_mean = []
+kf = KFold(n_splits=20, shuffle=True,random_state = 3)
+for nn in fibonacci:
+    knn = KNeighborsClassifier(n_neighbors = nn)
+    score_cv = cross_val_score(knn, X, y, cv = kf)
+    score_best.append(max(score_cv))
+    score_worse.append(min(score_cv))
+    score_mean.append(score_cv.mean())
+    
+plt.plot()
+plt.plot(fibonacci,score_best,"o--" , label = "Mejor score obtenido")
+plt.plot(fibonacci,score_worse,"o--" , label = "Peor score obtenido")
+plt.plot(fibonacci,score_mean,"o--" , label = "Promedio score obtenido")
+plt.legend()
+plt.xlabel("Numero de vecinos")
+plt.ylabel("Performance")
+plt.title("Perfomances CrossValidation de knn-distancia \n para diferente numero de vecinos cercanos")
+plt.show()
