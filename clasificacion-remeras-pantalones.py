@@ -1,8 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-Created on %(date)s
-
-@author: %(Facundo Munho)s
+Trabajo Practico 2
+Alumnos:
+    Munho Vital Facundo Nicolas
+    Cáceres Blanco Juan Manuel
+    Pavez Cayupe Richard Arturo
+Grupo:
+    Club penguin
+Materia:
+    Labo De Datos
+Cuatrimestre y año:
+    2c 2023
+Departamento a cargo:
+    DC
+    
+Modelos de clasificacion remeras pantalones con knn, obtencion de zonas relevantes
 """
 import Limpieza_de_datos
 import pandas as pd
