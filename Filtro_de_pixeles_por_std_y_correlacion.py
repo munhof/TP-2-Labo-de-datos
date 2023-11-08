@@ -13,7 +13,7 @@ from sklearn.metrics import r2_score
 import numpy as np
 import pandas as pd
 
-X_train, X_test, Y_train, Y_test = data_train_modelo_pantalon_remera()
+X_train, X_test, Y_train, Y_test = data_train_modelo_pantalon_remera(  )
 
 
 pantalones_y_remeras = X_train
@@ -74,9 +74,10 @@ def correlacion_entre_pixeles(pixeles_candidato):
             su_error = error_lineal_medio(ajuste_lineal, rls, primer_pixel, segundo_pixel,
                                           info_primer_pixel, info_segundo_pixel)
 
-            error.append(su_error)
-    tabla_de_correlacion = pd.DataFrame(np.column_stack(
-        [pixel1, pixel2, error]), columns=['Primer Pixel', 'Segundo Pixel', 'Su error'])
+            error.append(float(su_error))
+    tabla_de_correlacion = pd.DataFrame({'Primer Pixel':pixel1, 
+                                           'Segundo Pixel':pixel2, 
+                                           'Su error': error})
     # En cada fila de esta tabla hay dos pixeles y su correlacion, sin repetir.
     return tabla_de_correlacion
 
