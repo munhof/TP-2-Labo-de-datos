@@ -149,7 +149,7 @@ def data_train_modelo_multiclase():
         pd.serie con la informacion para testear el modelo
 
     """
-    _, Df_rest = data_validacion_modelo_pantalon_remera()
+    _, Df_rest = data_validacion_modelo_multiclase()
     #separo el resto en train y test
     res_rest = Df_rest[["label"]]
     Df_train,Df_test = train_test_split(
