@@ -25,7 +25,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import roc_curve, roc_auc_score
+from sklearn.metrics import roc_curve, roc_auc_score,precision_recall_curve
 
 import Limpieza_de_datos
 
@@ -67,19 +67,6 @@ plt.plot()
 sns.scatterplot(data = data_pantalon_remera, x = "distancia remera", y = "distancia pantalon",
                 hue = "label")
 plt.title("Distancia a arquetipos")
-plt.show()
-
-plt.plot()
-sns.scatterplot(data = data_pantalon_remera, y = "label", x = "distancia pantalon",
-                hue = "label")
-plt.title("label vs distancia pantalon")
-plt.show()
-
-
-plt.plot()
-sns.scatterplot(data = data_pantalon_remera, y = "label", x = "distancia remera",
-                hue = "label")
-plt.title("label vs distancia remera")
 plt.show()
 
 del distancia_pantalon, distancia_remera, data_pantalon_remera
@@ -161,21 +148,24 @@ fibonacci = [0,1]
 fibonacci = [fibonacci[i - 1] + fibonacci[i - 2] for i in range(2, n) if (fibonacci := fibonacci + [fibonacci[-1] + fibonacci[-2]])[-1] < n]
 
 #defino hyperparametros
-hyper_params = {'n_neighbors': fibonacci}
+hyper_params = {'n_neighbors': [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]}
 
 #defino el modelo
 knn_distancia = KNeighborsClassifier()
-
-clf = GridSearchCV(knn_distancia, hyper_params,cv = 30)
+clf = GridSearchCV(knn_distancia, hyper_params,cv = 5)
 search = clf.fit(X[["distancia remera","distancia pantalon"]], y)
 # lo mejores parametros encontrados son:
 print(f"mejor parametro {search.best_params_}")
 print(f"mejor score {search.best_score_}")
 
+clf = KNeighborsClassifier(n_neighbors=5) 
+clf.fit(X_train,y_train,)
 
+fpr, tpr, _ = precision_recall_curve(y_test, clf.predict_proba(X_test)[:, 1])
+plt.plot(fpr,tpr)
 #sin embargo verifico la performance de cada uno para ver como se comporta
 
-def evaluate_model(model, X, y, hyperparameters, cv):
+def evaluate_model(model, X_train,X_test, y_train,y_test, hyperparameters, cv):
     # Listas para almacenar los resultados
     score_best = []
     score_worse = []
@@ -183,41 +173,29 @@ def evaluate_model(model, X, y, hyperparameters, cv):
     roc_curves = []
     roc_aucs = []
 
-    kf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=3)
 
     for param in hyperparameters:
         clf = model(**param)
-        
         # Calcula los puntajes de validación cruzada
-        score_cv = cross_val_score(clf, X, y, cv=kf)
+        score_cv = cross_val_score(clf, X_train, y_train, cv=cv)
         score_best.append(max(score_cv))
         score_worse.append(min(score_cv))
         score_mean.append(score_cv.mean())
         
         # Listas para almacenar las predicciones y etiquetas reales
-        y_pred_all = []
-        y_true_all = []
+        clf.fit(X_train, y_train)
         
-        for train_idx, test_idx in list(kf.split(X, y)):
-            X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
-            y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
-            
-            # Ajusta el modelo
-            clf.fit(X_train, y_train)
+        y_pred_prob = clf.predict_proba(X_test)[:, 1]
         
-            y_pred_prob = clf.predict_proba(X_test)[:, 1]
-        
-            y_pred_all = y_pred_all + list(y_pred_prob)
-            y_true_all = y_true_all + list(y_test.values.reshape(np.shape(y_test)[0]))
             
         # Después de completar todos los folds
-        fpr, tpr, _ = roc_curve(y_true_all, y_pred_all)
+        fpr, tpr, _ = roc_curve(y_test, y_pred_prob)
         
         # Calcula la curva ROC
         roc_curves.append((fpr, tpr))
         
         # Calcula el área bajo la curva ROC (AUC)
-        auc = roc_auc_score(y_true_all, y_pred_all)
+        auc = roc_auc_score(y_test, y_pred_prob)
         roc_aucs.append(auc)
     
     
@@ -228,7 +206,8 @@ def evaluate_model(model, X, y, hyperparameters, cv):
 n = 145
 fibonacci_dict = [{'n_neighbors': 1}, {'n_neighbors': 2}]
 fibonacci_dict += [{'n_neighbors': i} for i in range(2, n) if (fibonacci_dict := fibonacci_dict + [{'n_neighbors': fibonacci_dict[-1]['n_neighbors'] + fibonacci_dict[-2]['n_neighbors']}])[-1]['n_neighbors'] < n]
-score_best,score_worse,score_mean,roc_curves,roc_aucs = evaluate_model(KNeighborsClassifier, X, y,fibonacci_dict, cv=20)
+score_best,score_worse,score_mean,roc_curves,roc_aucs = evaluate_model(KNeighborsClassifier, X_train,X_test, y_train,y_test,
+                                                                       fibonacci_dict, cv=5)
 
     
 # Gráficos
@@ -246,6 +225,45 @@ ax1.set_title("Puntajes de CrossValidation del modelo\n para diferentes hiperpar
 # Gráfico de curvas ROC
 for i,param  in enumerate(fibonacci):
     fpr, tpr = roc_curves[i]
+    ax2.plot(fpr, tpr, label=f"ROC n_neighbors= {param}-, AUC={roc_aucs[i]:.8f}")
+
+ax2.plot([0, 1], [0, 1], 'k--')
+ax2.set_xlabel('Tasa de Falsos Positivos')
+ax2.set_ylabel('Tasa de Verdaderos Positivos')
+ax2.set_title('Curvas ROC')
+ax2.legend()
+
+plt.tight_layout()
+plt.show()
+## se puede observar que el mejor parametro (34) y los parametros de 2 a 89
+#son muy similares en rendimiento maximo y en la curva roc, en especial queda
+#destacar que tanto n_neighbors = 5 y n_neighbors = 34 tienen putajes muy similares
+#tanto en score promedio y score minimo tambien, entonces si bien 34 puede ser
+#el mejor, con n_neighbors = 5 consigo un trabajo similar y con menores calculos
+n = 30
+m = 80
+hyperparams = []
+hyperparams += [{'n_neighbors': i} for i in range(n, m) if i%2 != 0 and i%5 == 0]
+score_best,score_worse,score_mean,roc_curves,roc_aucs = evaluate_model(KNeighborsClassifier,X_train,X_test, y_train,y_test,
+                                                                       hyperparams, cv=5)
+
+    
+# Gráficos
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+hyperparams = []
+hyperparams += [i for i in range(n, m) if i%2 != 0]
+# Gráfico de puntajes de validación cruzada
+ax1.plot(hyperparams, score_best, "o--", label="Mejor score obtenido")
+ax1.plot(hyperparams, score_worse, "o--", label="Peor score obtenido")
+ax1.plot(hyperparams, score_mean, "o--", label="Promedio score obtenido")
+ax1.legend()
+ax1.set_xlabel("Hiperparámetros")
+ax1.set_ylabel("Performance")
+ax1.set_title("Puntajes de CrossValidation del modelo\n para diferentes hiperparámetros")
+
+# Gráfico de curvas ROC
+for i,param  in enumerate(hyperparams):
+    fpr, tpr = roc_curves[i]
     ax2.plot(fpr, tpr, label=f"ROC n_neighbors= {param}-, AUC={roc_aucs[i]:.2f}")
 
 ax2.plot([0, 1], [0, 1], 'k--')
@@ -256,9 +274,3 @@ ax2.legend()
 
 plt.tight_layout()
 plt.show()
-
-## se puede observar que el mejor parametro (34) y los parametros de 2 a 89
-#son muy similares en rendimiento maximo y en la curva roc, en especial queda
-#destacar que tanto n_neighbors = 5 y n_neighbors = 34 tienen putajes muy similares
-#tanto en score promedio y score minimo tambien, entonces si bien 34 puede ser
-#el mejor, con n_neighbors = 5 consigo un trabajo similar y con menores calculos
