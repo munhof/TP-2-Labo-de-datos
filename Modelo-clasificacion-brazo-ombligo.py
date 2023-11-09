@@ -1,3 +1,4 @@
+#%%
 # -*- coding: utf-8 -*-
 """
 Trabajo Practico 2
@@ -34,7 +35,7 @@ cod_prendas = pd.read_csv("./Dataset-original/cod-prendas.csv")
 book_fotos = Limpieza_de_datos.book_fotos()
 # grafico el promedio de las remeras
 
-
+#%%
 dataset_shirt = book_fotos[0]
 remera_arquetipo = Limpieza_de_datos.prendas_arquetipicas()[0].to_numpy()
 
@@ -52,19 +53,22 @@ data_remera =Limpieza_de_datos.book_fotos()[0]
 data_pantalon =Limpieza_de_datos.book_fotos()[1]
 data_remera_pantalon = pd.concat([data_remera,data_pantalon])
 
+#%%
 #Verifico que esten balanceados
 data_remera.info()
 data_pantalon.info()
 data_remera_pantalon.info()
 
+#%%
 # Selecciono los pixeles de interes
 print(distancia_arquetipos.max())
 print(np.where(distancia_arquetipos >= 140))
-
+#%%
 # pixeles de interes
 #  pixeles_brazos : [203,231,232,246,260]
 #  pixeles_ombligo : [575,603,631,659,687,743]
 
+#%%
 # me quedo con los pixeles de interes y los sumo para asignarlos a los atributos brazo y ombligo
 def transfromadorBrazoOmbligo(data):
     data['pixeles_brazos'] = data[['pixel203','pixel231','pixel232','pixel246','pixel260']].sum(axis=1)/255
@@ -106,9 +110,8 @@ fig.suptitle("Modelo de clasficiacion de KNN por \n distancia arquetipos")
 
 #borro las varibales
 del fig,axs,data_test_modelo,data_test,knn_distancia,x_test,x_train
-del pantalon_arquetipo, remera_arquetipo
 
-
+#%%
 #ahora comprobemos como se comporta el modelo variando el hyper parametro n_neighbors
 
 X = pd.concat([X_train,X_test])
@@ -142,6 +145,7 @@ fpr, tpr, _ = precision_recall_curve(y_test, clf.predict_proba(x_test)[:, 1])
 plt.plot(fpr,tpr)
 #sin embargo verifico la performance de cada uno para ver como se comporta
 
+#%%
 def evaluate_model(model, x_train,x_test, y_train,y_test, hyperparameters, cv):
     # Listas para almacenar los resultados
     score_best = []
@@ -179,7 +183,6 @@ def evaluate_model(model, x_train,x_test, y_train,y_test, hyperparameters, cv):
     return score_best,score_worse,score_mean,roc_curves,roc_aucs
 
 primos = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
-n = 145
 primos_dict = [{'n_neighbors': i} for i in primos]
 score_best,score_worse,score_mean,roc_curves,roc_aucs = evaluate_model(KNeighborsClassifier, x_train,x_test,
                                                                        y_train,y_test,
@@ -215,3 +218,4 @@ ax2.grid()
 plt.tight_layout()
 
 plt.show()
+# %%
