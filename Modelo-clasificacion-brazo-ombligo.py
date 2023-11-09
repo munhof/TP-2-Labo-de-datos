@@ -29,7 +29,7 @@ from sklearn.metrics import roc_curve, roc_auc_score,precision_recall_curve
 import Limpieza_de_datos
 
 #importo el data set
-cod_prendas = pd.read_csv("cod-prendas.csv")
+cod_prendas = pd.read_csv("./Dataset-original/cod-prendas.csv")
 
 book_fotos = Limpieza_de_datos.book_fotos()
 # grafico el promedio de las remeras
@@ -128,6 +128,8 @@ clf = GridSearchCV(knn_regiones, hyper_params,scoring="accuracy",cv = 5)
 search = clf.fit(X[["pixeles_brazos","pixeles_ombligo"]], y)
 # lo mejores parametros encontrados son:
 print(f"mejor parametro {search.best_params_}")
+mejor_param = search.best_params_["n_neighbors"]
+mejor_score = search.best_score_
 print(f"mejor score {search.best_score_}")
 
 x_train = transfromadorBrazoOmbligo(X_train)
@@ -176,35 +178,40 @@ def evaluate_model(model, x_train,x_test, y_train,y_test, hyperparameters, cv):
     
     return score_best,score_worse,score_mean,roc_curves,roc_aucs
 
+primos = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
 n = 145
-fibonacci_dict = [{'n_neighbors': 1}, {'n_neighbors': 2}]
-fibonacci_dict += [{'n_neighbors': i} for i in range(2, n) if (fibonacci_dict := fibonacci_dict + [{'n_neighbors': fibonacci_dict[-1]['n_neighbors'] + fibonacci_dict[-2]['n_neighbors']}])[-1]['n_neighbors'] < n]
-score_best,score_worse,score_mean,roc_curves,roc_aucs = evaluate_model(KNeighborsClassifier, x_train,x_test, y_train,y_test,
-                                                                       fibonacci_dict, cv=5)
+primos_dict = [{'n_neighbors': i} for i in primos]
+score_best,score_worse,score_mean,roc_curves,roc_aucs = evaluate_model(KNeighborsClassifier, x_train,x_test,
+                                                                       y_train,y_test,
+                                                                       primos_dict, cv=5)
 
 
 # Gráficos
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-    
+
 # Gráfico de puntajes de validación cruzada
-ax1.plot(fibonacci, score_best, "o--", label="Mejor score obtenido")
-ax1.plot(fibonacci, score_worse, "o--", label="Peor score obtenido")
-ax1.plot(fibonacci, score_mean, "o--", label="Promedio score obtenido")
+ax1.plot(primos, score_best, "o--", label="Mejor score obtenido")
+ax1.plot(primos, score_worse, "o--", label="Peor score obtenido")
+ax1.plot(primos, score_mean, "o--", label="Promedio score obtenido")
+ax1.axhline(mejor_score,linestyle = ":", color = "green" ,label = "Mejor score medio obtenido en CV")
+ax1.axvline(mejor_param,linestyle = ":", color = "green" ,label = "Mejor parametro encontrado en CV")
 ax1.legend()
 ax1.set_xlabel("Hiperparámetros")
 ax1.set_ylabel("Performance")
 ax1.set_title("Puntajes de CrossValidation del modelo\n para diferentes hiperparámetros")
+ax1.grid()
 
 # Gráfico de curvas ROC
 for i,param  in enumerate(fibonacci):
     fpr, tpr = roc_curves[i]
-    ax2.plot(fpr, tpr, label=f"ROC n_neighbors= {param}-, AUC={roc_aucs[i]:.8f}")
+    ax2.plot(fpr, tpr, label=f" {param}, AUC={roc_aucs[i]:.3f}")
 
 ax2.plot([0, 1], [0, 1], 'k--')
 ax2.set_xlabel('Tasa de Falsos Positivos')
 ax2.set_ylabel('Tasa de Verdaderos Positivos')
 ax2.set_title('Curvas ROC')
-ax2.legend()
-
+ax2.legend(title = "Cantitad de vecinos y AUC")
+ax2.grid()
 plt.tight_layout()
+
 plt.show()
