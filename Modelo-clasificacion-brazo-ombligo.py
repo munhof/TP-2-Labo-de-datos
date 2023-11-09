@@ -30,7 +30,7 @@ from sklearn.metrics import roc_curve, roc_auc_score,precision_recall_curve
 import Limpieza_de_datos
 
 #importo el data set
-cod_prendas = pd.read_csv("cod-prendas.csv")
+cod_prendas = pd.read_csv("./Dataset-original/cod-prendas.csv")
 
 book_fotos = Limpieza_de_datos.book_fotos()
 # grafico el promedio de las remeras
