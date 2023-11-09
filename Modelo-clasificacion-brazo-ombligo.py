@@ -136,7 +136,7 @@ x_train = transfromadorBrazoOmbligo(X_train)
 x_test = transfromadorBrazoOmbligo(X_test)
 
 clf = KNeighborsClassifier(n_neighbors=5) 
-clf.fit(x_train,y_train,)
+clf.fit(x_train,y_train)
 
 fpr, tpr, _ = precision_recall_curve(y_test, clf.predict_proba(x_test)[:, 1])
 plt.plot(fpr,tpr)
