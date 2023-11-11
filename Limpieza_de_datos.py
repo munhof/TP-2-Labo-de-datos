@@ -4,7 +4,7 @@ Trabajo Practico 2
 Alumnos:
     Munho Vital Facundo Nicolas
     Cáceres Blanco Juan Manuel
-    Pavez Cayupe Richard Arturo
+    Pavez Cayupel Richard Arturo
 Grupo:
     Club penguin
 Materia:
