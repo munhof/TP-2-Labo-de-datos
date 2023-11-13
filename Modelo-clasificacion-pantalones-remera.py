@@ -1,4 +1,6 @@
+#%%
 # -*- coding: utf-8 -*-
+
 """
 Trabajo Practico 2
 Alumnos:
@@ -26,6 +28,8 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_curve, roc_auc_score,precision_recall_curve
+from Limpieza_de_datos import data_train_modelo_pantalon_remera
+from sklearn import linear_model
 
 import Limpieza_de_datos
 
@@ -71,6 +75,7 @@ plt.show()
 
 del distancia_pantalon, distancia_remera, data_pantalon_remera
 
+#%%
 #vemos que hay dos grandes regiones donde tiene sentido realizar la clasificacion
 #con esta metrica, veamos que pasa con knn
 
@@ -139,7 +144,7 @@ del fig,axs,data_test_modelo,data_test,knn_distancia,x_test,x_train,
 del pantalon_arquetipo, remera_arquetipo
 del distancia_pantalon, distancia_remera
 #ahora comprobemos como se comporta el modelo variando el hyper parametro n_neighbors
-
+#%%
 x_train = X_train[["distancia remera","distancia pantalon"]]
 x_test = X_test[["distancia remera","distancia pantalon"]]
 x_test_distancia = x_test.copy()
@@ -255,18 +260,14 @@ ax2.grid()
 plt.tight_layout()
 plt.savefig('.\modelo-pantalon-remera\Clasificacion-arquetipos-evaluacion.png')
 plt.show()
+
+
+
+
+
 #%%
 #aca inicia el modelo de correlacion
-from Limpieza_de_datos import data_train_modelo_pantalon_remera, data_train_modelo_multiclase
-from sklearn import linear_model
-from sklearn.metrics import r2_score, classification_report, roc_curve, roc_auc_score,precision_recall_curve
-import numpy as np
-import pandas as pd
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV, cross_val_score, train_test_split
-import matplotlib.pyplot as plt
-from sklearn.tree import DecisionTreeClassifier,plot_tree,export_graphviz
-#%%
+
 X_train, X_test, y_train, y_test = data_train_modelo_pantalon_remera(  )
 
 pantalones_y_remeras = X_train
@@ -438,13 +439,6 @@ del maximo
 
 
 
-
-
-
-
-
-
-
 # Entreno y testeo un modelo de knn seleccionando los pixeles con el metodo visto anteriormente solo 
 # con pantalones y remeras.
 
@@ -486,41 +480,6 @@ plt.ylabel("Recall")
 
 #sin embargo verifico la performance de cada uno para ver como se comporta
 
-def evaluate_model(model, X_train,X_test, y_train,y_test, hyperparameters, cv):
-    # Listas para almacenar los resultados
-    score_best = []
-    score_worse = []
-    score_mean = []
-    roc_curves = []
-    roc_aucs = []
-
-
-    for param in hyperparameters:
-        clf = model(**param)
-        # Calcula los puntajes de validación cruzada
-        score_cv = cross_val_score(clf, X_train, y_train, cv=cv)
-        score_best.append(max(score_cv))
-        score_worse.append(min(score_cv))
-        score_mean.append(score_cv.mean())
-        
-        # Listas para almacenar las predicciones y etiquetas reales
-        clf.fit(X_train, y_train)
-        
-        y_pred_prob = clf.predict_proba(X_test)[:, 1]
-        
-            
-        # Después de completar todos los folds
-        fpr, tpr, _ = roc_curve(y_test, y_pred_prob)
-        
-        # Calcula la curva ROC
-        roc_curves.append((fpr, tpr))
-        
-        # Calcula el área bajo la curva ROC (AUC)
-        auc = roc_auc_score(y_test, y_pred_prob)
-        roc_aucs.append(auc)
-    
-    
-    return score_best,score_worse,score_mean,roc_curves,roc_aucs
 
 primos = [2, 3, 5,  13, 17, 19, 23, 29, 41,53 ,67, 71, 73, 79]
 primos_dict = [{'n_neighbors': i} for i in primos]
@@ -557,13 +516,16 @@ ax2.grid()
 plt.tight_layout()
 plt.savefig('.\modelo-pantalon-remera\Clasificacion-pixeles-evaluacion.png')
 plt.show()
+
+
+
+
+
 #%%
 #aca incia el modelo de regiones
 book_fotos = Limpieza_de_datos.book_fotos()
-dataset_shirt = book_fotos[0]
-remera_arquetipo = Limpieza_de_datos.prendas_arquetipicas()[0].to_numpy()
 
-dataset_trouser = book_fotos[1]
+remera_arquetipo = Limpieza_de_datos.prendas_arquetipicas()[0].to_numpy()
 pantalon_arquetipo = Limpieza_de_datos.prendas_arquetipicas()[1].to_numpy()
 
 # grafico la diferencia absoluta entre el prom. de las dos imagenes
@@ -689,41 +651,6 @@ plt.plot(fpr,tpr)
 #sin embargo verifico la performance de cada uno para ver como se comporta
 
 #%%
-def evaluate_model(model, x_train,x_test, y_train,y_test, hyperparameters, cv):
-    # Listas para almacenar los resultados
-    score_best = []
-    score_worse = []
-    score_mean = []
-    roc_curves = []
-    roc_aucs = []
-
-
-    for param in hyperparameters:
-        clf = model(**param)
-        # Calcula los puntajes de validación cruzada
-        score_cv = cross_val_score(clf, x_train, y_train, cv=cv)
-        score_best.append(max(score_cv))
-        score_worse.append(min(score_cv))
-        score_mean.append(score_cv.mean())
-        
-        # Listas para almacenar las predicciones y etiquetas reales
-        clf.fit(x_train, y_train)
-        
-        y_pred_prob = clf.predict_proba(x_test)[:, 1]
-        
-            
-        # Después de completar todos los folds
-        fpr, tpr, _ = roc_curve(y_test, y_pred_prob)
-        
-        # Calcula la curva ROC
-        roc_curves.append((fpr, tpr))
-        
-        # Calcula el área bajo la curva ROC (AUC)
-        auc = roc_auc_score(y_test, y_pred_prob)
-        roc_aucs.append(auc)
-    
-    
-    return score_best,score_worse,score_mean,roc_curves,roc_aucs
 
 primos = [2, 3, 5,  13, 17, 19, 23, 29, 41,53 ,67, 71, 73, 79,]
 primos_dict = [{'n_neighbors': i} for i in primos]
