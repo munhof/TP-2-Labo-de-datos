@@ -25,7 +25,12 @@ from sklearn.tree import DecisionTreeClassifier,plot_tree,export_graphviz
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import classification_report
+from sklearn import linear_model
+from Limpieza_de_datos import data_train_modelo_pantalon_remera, data_train_modelo_multiclase
+from sklearn.metrics import r2_score, classification_report, roc_curve, roc_auc_score,precision_recall_curve
+from sklearn.neighbors import KNeighborsClassifier
+
+
 #import graphviz
 
 import Limpieza_de_datos
@@ -162,10 +167,6 @@ print(f"mejor score {search.best_score_}")
 
 #hay entre un arbol de 11 y 5 de altura hay una diferencia de 0.01 en
 #score, verifico las curvas roc y la evolucion de rendimiento
-
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import classification_report
-import pandas as pd
 
 #%%
 def evaluate_model(model, X_train, X_test, y_train, y_test, hyperparameters, cv):
@@ -360,17 +361,9 @@ save_classification_report_to_csv(entropy_reports[worst_entropy_idx], class_name
 save_classification_report_to_csv(entropy_reports[best_entropy_idx], class_names, "./reportes_clasificacion/best_entropy_report.csv")
 save_classification_report_to_csv(entropy_reports[mean_entropy_idx], class_names, "./reportes_clasificacion/mean_entropy_report.csv")
 
-#%% aca arranca el modelo multiclase de correlacion
 
-from Limpieza_de_datos import data_train_modelo_pantalon_remera, data_train_modelo_multiclase
-from sklearn import linear_model
-from sklearn.metrics import r2_score, classification_report, roc_curve, roc_auc_score,precision_recall_curve
-import numpy as np
-import pandas as pd
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import GridSearchCV, cross_val_score, train_test_split
-import matplotlib.pyplot as plt
-from sklearn.tree import DecisionTreeClassifier,plot_tree,export_graphviz
+
+#%% aca arranca el modelo multiclase de correlacion
 
 X_train, X_test, y_train, y_test = data_train_modelo_pantalon_remera(  )
 
