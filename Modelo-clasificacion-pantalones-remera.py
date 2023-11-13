@@ -132,6 +132,7 @@ axs[1] = sns.scatterplot(data = data_test_modelo, x = "distancia remera", y = "d
                          hue = "label",  ax = axs[1] )
 axs[1].set_title("distribucion datos modelo")
 fig.suptitle("Modelo de clasficiacion de KNN por \n distancia arquetipos")
+plt.savefig('.\modelo-pantalon-remera\Clasificacion-arquetipos-arbitraria.png')
 
 #borro las varibales
 del fig,axs,data_test_modelo,data_test,knn_distancia,x_test,x_train,
@@ -141,12 +142,8 @@ del distancia_pantalon, distancia_remera
 
 x_train = X_train[["distancia remera","distancia pantalon"]]
 x_test = X_test[["distancia remera","distancia pantalon"]]
+x_test_distancia = x_test.copy()
 
-
-#armo una lista de parametros, en este caso distruidos con la secuencia de fibonacci
-n = 145  # Reemplaza 10 con el valor deseado de 'n'
-fibonacci = [0,1]
-fibonacci = [fibonacci[i - 1] + fibonacci[i - 2] for i in range(2, n) if (fibonacci := fibonacci + [fibonacci[-1] + fibonacci[-2]])[-1] < n]
 
 #defino hyperparametros
 hyper_params = {'n_neighbors': [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]}
@@ -161,10 +158,27 @@ mejor_param = search.best_params_["n_neighbors"]
 mejor_score = search.best_score_
 print(f"mejor score {search.best_score_}")
 
-clf = KNeighborsClassifier(n_neighbors=5) 
-clf.fit(x_train,y_train,)
+knn_distancia = KNeighborsClassifier(mejor_param) 
+knn_distancia.fit(x_train,y_train,)
+data_test = x_test.copy()
+data_test["label"] = y_test.copy()
 
-fpr, tpr, _ = precision_recall_curve(y_test, clf.predict_proba(x_test)[:, 1])
+data_test_modelo = x_test.copy()
+data_test_modelo["label"] = knn_distancia.predict(x_test)
+fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(10, 10))
+
+axs[0] = sns.scatterplot(data = data_test, x = "distancia remera", y = "distancia pantalon", 
+                         hue = "label", ax = axs[0] )
+axs[0].set_title("distribucion datos original")
+
+axs[1] = sns.scatterplot(data = data_test_modelo, x = "distancia remera", y = "distancia pantalon",
+                         hue = "label",  ax = axs[1] )
+axs[1].set_title("distribucion datos modelo")
+fig.suptitle("Modelo de clasficiacion de KNN por \n distancia arquetipos")
+plt.savefig('.\modelo-pantalon-remera\Clasificacion-arquetipos-mejor.png')
+
+y_pred_prob = knn_distancia.predict_proba(x_test)[:,1]
+fpr, tpr, _ = roc_curve(y_test, y_pred_prob)
 plt.plot(fpr,tpr)
 #sin embargo verifico la performance de cada uno para ver como se comporta
 
@@ -205,8 +219,7 @@ def evaluate_model(model, X_train,X_test, y_train,y_test, hyperparameters, cv):
     return score_best,score_worse,score_mean,roc_curves,roc_aucs
 
 
-primos = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
-n = 145
+primos = [2, 3, 5,  13, 17, 19, 23, 29, 41,53 ,67, 71, 73, 79,]
 primos_dict = [{'n_neighbors': i} for i in primos]
 score_best,score_worse,score_mean,roc_curves,roc_aucs = evaluate_model(KNeighborsClassifier, x_train,x_test,
                                                                        y_train,y_test,
@@ -223,15 +236,15 @@ ax1.plot(primos, score_mean, "o--", label="Promedio score obtenido")
 ax1.axhline(mejor_score,linestyle = ":", color = "green" ,label = "Mejor score medio obtenido en CV")
 ax1.axvline(mejor_param,linestyle = ":", color = "green" ,label = "Mejor parametro encontrado en CV")
 ax1.legend()
-ax1.set_xlabel("Hiperparámetros")
+ax1.set_xlabel("K-vecinos")
 ax1.set_ylabel("Performance")
 ax1.set_title("Puntajes de CrossValidation del modelo\n para diferentes hiperparámetros")
 ax1.grid()
 
 # Gráfico de curvas ROC
-for i,param  in enumerate(fibonacci):
+for i,param  in enumerate(primos_dict):
     fpr, tpr = roc_curves[i]
-    ax2.plot(fpr, tpr, label=f" {param}, AUC={roc_aucs[i]:.3f}")
+    ax2.plot(fpr, tpr, label=f" k = {i}, AUC={roc_aucs[i]:.3f}")
 
 ax2.plot([0, 1], [0, 1], 'k--')
 ax2.set_xlabel('Tasa de Falsos Positivos')
@@ -240,7 +253,7 @@ ax2.set_title('Curvas ROC')
 ax2.legend(title = "Cantitad de vecinos y AUC")
 ax2.grid()
 plt.tight_layout()
-
+plt.savefig('.\modelo-pantalon-remera\Clasificacion-arquetipos-evaluacion.png')
 plt.show()
 #%%
 #aca inicia el modelo de correlacion
@@ -437,49 +450,40 @@ del maximo
 
 x_train = X_train[pixeles_elejidos]
 x_test = X_test[pixeles_elejidos]
-
+x_test_pix = x_test.copy()
 #armo el modelo, arbitrariamente elijo 5
 knn_correlacion = KNeighborsClassifier(n_neighbors=5) 
 
 #entreno el modelo
 knn_correlacion.fit(x_train,y_train)
 
-data_test = x_test.copy()
-data_test["label"] = y_test.copy()
-
-data_test_modelo = x_test.copy()
-data_test_modelo["label"] = knn_distancia.predict(x_test)
 
 #reviso el score con los dato de test
-print(knn_distancia.score(x_test, y_test))
+print(knn_correlacion.score(x_test, y_test))
 
-#armo una lista de parametros, en este caso distruidos con la secuencia de fibonacci
-n = 145  # Reemplaza 10 con el valor deseado de 'n'
-fibonacci = [0,1]
-fibonacci = [fibonacci[i - 1] + fibonacci[i - 2] for i in range(2, n) if (fibonacci := fibonacci + [fibonacci[-1] + fibonacci[-2]])[-1] < n]
 
 #defino hyperparametros
 hyper_params = {'n_neighbors': [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]}
 
 #defino el modelo
 knn_correlacion = KNeighborsClassifier()
-clf = GridSearchCV(knn_distancia, hyper_params,cv = 5)
+clf = GridSearchCV(knn_correlacion, hyper_params,cv = 5)
 search = clf.fit(x_train, y_train)
 # lo mejores parametros encontrados son:
 print(f"mejor parametro {search.best_params_}")
 mejor_param_correlacion = search.best_params_["n_neighbors"]
 mejor_score_correlacion = search.best_score_
 print(f"mejor score {search.best_score_}")
-knn_correlacion = KNeighborsClassifier(mejor_param_correlacion)
-knn_correlacion.fit(X_train,y_train)
-clf = KNeighborsClassifier(n_neighbors=17) 
-clf.fit(x_train,y_train,)
 
-fpr, tpr, _ = precision_recall_curve(y_test, clf.predict_proba(x_test)[:, 1])
+knn_correlacion = KNeighborsClassifier(mejor_param_correlacion) 
+knn_correlacion.fit(x_train,y_train,)
+y_pred_prob = knn_correlacion.predict_proba(x_test)[:,1]
+fpr, tpr, _ = roc_curve(y_test, y_pred_prob)
+plt.plot(fpr,tpr)
 plt.title("Precision-Recall curve")
 plt.xlabel("Precision")
 plt.ylabel("Recall")
-plt.plot(fpr,tpr)
+
 #sin embargo verifico la performance de cada uno para ver como se comporta
 
 def evaluate_model(model, X_train,X_test, y_train,y_test, hyperparameters, cv):
@@ -518,8 +522,7 @@ def evaluate_model(model, X_train,X_test, y_train,y_test, hyperparameters, cv):
     
     return score_best,score_worse,score_mean,roc_curves,roc_aucs
 
-primos = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
-n = 145
+primos = [2, 3, 5,  13, 17, 19, 23, 29, 41,53 ,67, 71, 73, 79]
 primos_dict = [{'n_neighbors': i} for i in primos]
 score_best,score_worse,score_mean,roc_curves,roc_aucs = evaluate_model(KNeighborsClassifier, x_train,x_test,
                                                                        y_train,y_test,
@@ -532,13 +535,28 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 ax1.plot(primos, score_best, "o--", label="Mejor score obtenido")
 ax1.plot(primos, score_worse, "o--", label="Peor score obtenido")
 ax1.plot(primos, score_mean, "o--", label="Promedio score obtenido")
-ax1.axhline(mejor_score,linestyle = ":", color = "green" ,label = "Mejor score medio obtenido en CV")
-ax1.axvline(mejor_param,linestyle = ":", color = "green" ,label = "Mejor parametro encontrado en CV")
+ax1.axhline(mejor_score_correlacion,linestyle = ":", color = "green" ,label = "Mejor score medio obtenido en CV")
+ax1.axvline(mejor_param_correlacion,linestyle = ":", color = "green" ,label = "Mejor parametro encontrado en CV")
 ax1.legend()
-ax1.set_xlabel("Hiperparámetros")
+ax1.set_xlabel("K-vecinos")
 ax1.set_ylabel("Performance")
 ax1.set_title("Puntajes de CrossValidation del modelo\n para diferentes hiperparámetros")
 ax1.grid()
+
+# Gráfico de curvas ROC
+for i,param  in enumerate(primos_dict):
+    fpr, tpr = roc_curves[i]
+    ax2.plot(fpr, tpr, label=f" k = {i}, AUC={roc_aucs[i]:.3f}")
+
+ax2.plot([0, 1], [0, 1], 'k--')
+ax2.set_xlabel('Tasa de Falsos Positivos')
+ax2.set_ylabel('Tasa de Verdaderos Positivos')
+ax2.set_title('Curvas ROC')
+ax2.legend(title = "Cantitad de vecinos y AUC")
+ax2.grid()
+plt.tight_layout()
+plt.savefig('.\modelo-pantalon-remera\Clasificacion-pixeles-evaluacion.png')
+plt.show()
 #%%
 #aca incia el modelo de regiones
 book_fotos = Limpieza_de_datos.book_fotos()
@@ -598,7 +616,7 @@ data_test = x_test.copy()
 data_test["label"] = y_test.copy()
 
 data_test_modelo = x_test.copy()
-data_test_modelo["label"] = knn_distancia.predict(x_test)
+data_test_modelo["label"] = knn_regiones.predict(x_test)
 
 #reviso el score con los dato de test
 print(knn_regiones.score(x_test, y_test))
@@ -613,7 +631,7 @@ axs[1] = sns.scatterplot(data = data_test_modelo, x = "pixeles_brazos", y = "pix
                          hue = "label",  ax = axs[1] )
 axs[1].set_title("distribucion datos modelo")
 fig.suptitle("Modelo de clasficiacion de KNN por \n distancia arquetipos")
-
+plt.savefig(".\modelo-pantalon-remera\clasificacion-brazo-ombligo-arbitraria.png")
 #borro las varibales
 del fig,axs,data_test_modelo,data_test,knn_distancia,x_test,x_train
 
@@ -623,10 +641,6 @@ del fig,axs,data_test_modelo,data_test,knn_distancia,x_test,x_train
 X = pd.concat([X_train,X_test])
 y = pd.concat([y_train,y_test])
 
-#armo una lista de parametros, en este caso distruidos con la secuencia de fibonacci
-n = 145  # Reemplaza 10 con el valor deseado de 'n'
-fibonacci = [0,1]
-fibonacci = [fibonacci[i - 1] + fibonacci[i - 2] for i in range(2, n) if (fibonacci := fibonacci + [fibonacci[-1] + fibonacci[-2]])[-1] < n]
 
 #defino hyperparametros
 hyper_params = {'n_neighbors': [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]}
@@ -637,15 +651,38 @@ clf = GridSearchCV(knn_regiones, hyper_params,scoring="accuracy",cv = 5)
 search = clf.fit(X[["pixeles_brazos","pixeles_ombligo"]], y)
 # lo mejores parametros encontrados son:
 print(f"mejor parametro {search.best_params_}")
-mejor_param = search.best_params_["n_neighbors"]
-mejor_score = search.best_score_
+mejor_param_regiones = search.best_params_["n_neighbors"]
+mejor_score_regiones = search.best_score_
 print(f"mejor score {search.best_score_}")
 
 x_train = transfromadorBrazoOmbligo(X_train)
 x_test = transfromadorBrazoOmbligo(X_test)
+x_test_region = x_test.copy()
+knn_regiones = KNeighborsClassifier(mejor_param_regiones) 
 
-clf = KNeighborsClassifier(n_neighbors=5) 
-clf.fit(x_train,y_train)
+#entreno el modelo
+knn_regiones.fit(x_train,y_train)
+
+data_test = x_test.copy()
+data_test["label"] = y_test.copy()
+
+data_test_modelo = x_test.copy()
+data_test_modelo["label"] = knn_regiones.predict(x_test)
+
+#reviso el score con los dato de test
+print(knn_regiones.score(x_test, y_test))
+
+fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(10, 10))
+
+axs[0] = sns.scatterplot(data = data_test, x = "pixeles_brazos", y = "pixeles_ombligo", 
+                         hue = "label", ax = axs[0] )
+axs[0].set_title("distribucion datos original")
+
+axs[1] = sns.scatterplot(data = data_test_modelo, x = "pixeles_brazos", y = "pixeles_ombligo",
+                         hue = "label",  ax = axs[1] )
+axs[1].set_title("distribucion datos modelo")
+fig.suptitle("Modelo de clasficiacion de KNN por \n distancia arquetipos")
+plt.savefig(".\modelo-pantalon-remera\clasificacion-brazo-ombligo-mejor.png")
 
 fpr, tpr, _ = precision_recall_curve(y_test, clf.predict_proba(x_test)[:, 1])
 plt.plot(fpr,tpr)
@@ -688,12 +725,11 @@ def evaluate_model(model, x_train,x_test, y_train,y_test, hyperparameters, cv):
     
     return score_best,score_worse,score_mean,roc_curves,roc_aucs
 
-primos = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+primos = [2, 3, 5,  13, 17, 19, 23, 29, 41,53 ,67, 71, 73, 79,]
 primos_dict = [{'n_neighbors': i} for i in primos]
 score_best,score_worse,score_mean,roc_curves,roc_aucs = evaluate_model(KNeighborsClassifier, x_train,x_test,
                                                                        y_train,y_test,
                                                                        primos_dict, cv=5)
-
 
 # Gráficos
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
@@ -702,18 +738,18 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 ax1.plot(primos, score_best, "o--", label="Mejor score obtenido")
 ax1.plot(primos, score_worse, "o--", label="Peor score obtenido")
 ax1.plot(primos, score_mean, "o--", label="Promedio score obtenido")
-ax1.axhline(mejor_score,linestyle = ":", color = "green" ,label = "Mejor score medio obtenido en CV")
-ax1.axvline(mejor_param,linestyle = ":", color = "green" ,label = "Mejor parametro encontrado en CV")
+ax1.axhline(mejor_score_regiones,linestyle = ":", color = "green" ,label = "Mejor score medio obtenido en CV")
+ax1.axvline(mejor_param_regiones,linestyle = ":", color = "green" ,label = "Mejor parametro encontrado en CV")
 ax1.legend()
-ax1.set_xlabel("Hiperparámetros")
+ax1.set_xlabel("K-vecinos")
 ax1.set_ylabel("Performance")
 ax1.set_title("Puntajes de CrossValidation del modelo\n para diferentes hiperparámetros")
 ax1.grid()
 
 # Gráfico de curvas ROC
-for i,param  in enumerate(fibonacci):
+for i,param  in enumerate(primos_dict):
     fpr, tpr = roc_curves[i]
-    ax2.plot(fpr, tpr, label=f" {param}, AUC={roc_aucs[i]:.3f}")
+    ax2.plot(fpr, tpr, label=f" k = {i}, AUC={roc_aucs[i]:.3f}")
 
 ax2.plot([0, 1], [0, 1], 'k--')
 ax2.set_xlabel('Tasa de Falsos Positivos')
@@ -722,7 +758,7 @@ ax2.set_title('Curvas ROC')
 ax2.legend(title = "Cantitad de vecinos y AUC")
 ax2.grid()
 plt.tight_layout()
-
+plt.savefig('.\modelo-pantalon-remera\Clasificacion-region-evaluacion.png')
 plt.show()
 # %%
 
