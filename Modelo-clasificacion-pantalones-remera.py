@@ -633,7 +633,7 @@ axs[1].set_title("distribucion datos modelo")
 fig.suptitle("Modelo de clasficiacion de KNN por \n distancia arquetipos")
 plt.savefig(".\modelo-pantalon-remera\clasificacion-brazo-ombligo-arbitraria.png")
 #borro las varibales
-del fig,axs,data_test_modelo,data_test,knn_distancia,x_test,x_train
+del fig,axs,data_test_modelo,data_test,x_test,x_train
 
 #%%
 #ahora comprobemos como se comporta el modelo variando el hyper parametro n_neighbors
@@ -761,4 +761,45 @@ plt.tight_layout()
 plt.savefig('.\modelo-pantalon-remera\Clasificacion-region-evaluacion.png')
 plt.show()
 # %%
+#en esta seccion comparamos los tres modelos con los mejores parametros obtenidos
 
+y_pred_prob_distancia = knn_distancia.predict_proba(x_test_distancia)
+y_pred_prob_correlacion = knn_correlacion.predict_proba(x_test_pix)
+y_pred_prob_regiones = knn_regiones.predict_proba(x_test_region)
+
+lista_predicciones = [y_pred_prob_distancia[:,1],
+                      y_pred_prob_correlacion[:,1],
+                      y_pred_prob_regiones[:,1]]
+lista_nombres = ["Distancias","Correlaciones","Regiones"]
+
+for i in range(3):
+    fpr, tpr, _ = roc_curve(y_test, lista_predicciones[i])
+        
+        # Calcula la curva ROC
+        
+        # Calcula el área bajo la curva ROC (AUC)
+    auc = roc_auc_score(y_test, y_pred_prob)
+    plt.plot(fpr, tpr, label=f" modelo = {lista_nombres[i]}, AUC={roc_aucs[i]:.3f}")
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.xlabel('Tasa de Falsos Positivos')
+    plt.ylabel('Tasa de Verdaderos Positivos')
+    plt.title('Curvas ROC')
+    plt.legend(title = "Cantitad de vecinos y AUC")
+    plt.grid()
+plt.savefig(".\modelo-pantalon-remera\curvas-roc-compartivas.png")
+
+from Limpieza_de_datos import data_validacion_modelo_pantalon_remera
+
+(x_validacion, y_validacion),_ = data_validacion_modelo_pantalon_remera()
+x_validacion = transfromadorBrazoOmbligo(x_validacion)
+y_pred_prob_validacion =  knn_regiones.predict_proba(x_validacion)[:,1]
+fpr, tpr, _ = roc_curve(y_validacion, y_pred_prob_validacion)
+auc = roc_auc_score(y_validacion, y_pred_prob_validacion)
+plt.plot(fpr, tpr, label=f"AUC={roc_aucs[i]:.3f}")
+plt.plot([0, 1], [0, 1], 'k--')
+plt.xlabel('Tasa de Falsos Positivos')
+plt.ylabel('Tasa de Verdaderos Positivos')
+plt.title('Curvas ROC')
+plt.legend(title = "AUC")
+plt.grid()
+plt.savefig(".\modelo-pantalon-remera\curvas-roc-validacion.png")
