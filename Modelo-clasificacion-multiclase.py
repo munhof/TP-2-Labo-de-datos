@@ -20,15 +20,12 @@ Modelo arboles de decision para clasificacion multiclase
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.tree import DecisionTreeClassifier,plot_tree,export_graphviz
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import StratifiedKFold
 from sklearn import linear_model
 from Limpieza_de_datos import data_train_modelo_pantalon_remera, data_train_modelo_multiclase
-from sklearn.metrics import r2_score, classification_report, roc_curve, roc_auc_score,precision_recall_curve
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report
 
 
 #import graphviz
@@ -683,6 +680,9 @@ save_classification_report_to_csv(gini_reports[mean_gini_idx], class_names, "./r
 save_classification_report_to_csv(entropy_reports[worst_entropy_idx], class_names, "./reportes_clasificacion/worst_entropy_report_correlacion.csv")
 save_classification_report_to_csv(entropy_reports[best_entropy_idx], class_names, "./reportes_clasificacion/best_entropy_report_correlacion.csv")
 save_classification_report_to_csv(entropy_reports[mean_entropy_idx], class_names, "./reportes_clasificacion/mean_entropy_report_correlacion.csv")
+
+
+
 #%% aca arranca el modelo por regiones
 #A cada prenda arquetipica le resto el promedio de todas las prendas arquetipicas, sin contar esta. Los pixeles de mayor valor
 # me muestran las zonas mas representativas de la prenda arquetipica, mientras que los de menor valor muestran las menos representativas.
