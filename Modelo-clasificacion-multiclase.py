@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#%% -*- coding: utf-8 -*-
 """
 Trabajo Practico 2
 Alumnos:
@@ -167,6 +167,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.metrics import classification_report
 import pandas as pd
 
+#%%
 def evaluate_model(model, X_train, X_test, y_train, y_test, hyperparameters, cv):
     # Listas para almacenar los resultados
     score_best = []
@@ -214,7 +215,7 @@ def evaluate_model(model, X_train, X_test, y_train, y_test, hyperparameters, cv)
     score_mean = pd.DataFrame(score_mean, columns=["criterion", "max_depth", "score"])
     
     return score_best, score_worse, score_mean, classification_reports
-
+#%%
 hyper_params = {"criterion": ["gini", "entropy"],
                 "max_depth": [5,7,10,11,20,50],
                 }
@@ -295,7 +296,7 @@ ax1.set_title("Puntajes de CrossValidation del modelo")
 ax1.grid()
 
 plt.show()
-
+#%%
 # Filtrar los informes por criterio
 gini_reports = [report for i, report in enumerate(classification_reports) if gini_mask[i]]
 entropy_reports = [report for i, report in enumerate(classification_reports) if entropy_mask[i]]
@@ -358,6 +359,7 @@ save_classification_report_to_csv(gini_reports[mean_gini_idx], class_names, "./r
 save_classification_report_to_csv(entropy_reports[worst_entropy_idx], class_names, "./reportes_clasificacion/worst_entropy_report.csv")
 save_classification_report_to_csv(entropy_reports[best_entropy_idx], class_names, "./reportes_clasificacion/best_entropy_report.csv")
 save_classification_report_to_csv(entropy_reports[mean_entropy_idx], class_names, "./reportes_clasificacion/mean_entropy_report.csv")
+
 #%% aca arranca el modelo multiclase de correlacion
 
 from Limpieza_de_datos import data_train_modelo_pantalon_remera, data_train_modelo_multiclase
@@ -564,53 +566,6 @@ mejor_param_criterio = search.best_params_["criterion"]
 mejor_score = search.best_score_
 print(f"mejor score {search.best_score_}")
 
-def evaluate_model(model, X_train, X_test, y_train, y_test, hyperparameters, cv):
-    # Listas para almacenar los resultados
-    score_best = []
-    score_worse = []
-    score_mean = []
-    classification_reports = []
-    
-    class_names = [
-        "remera",
-        "pantalon",
-        "pullover",
-        "vestidos",
-        "camperas",
-        "sandalias",
-        "camisetas",
-        "zapatillas",
-        "bolsos",
-        "botas"
-    ]
-    
-    for criterio in hyperparameters["criterion"]:
-        for max_profundidad in hyperparameters["max_depth"]:
-            params = {"criterion": criterio, "max_depth": max_profundidad, "random_state": 5}
-            clf = model(**params)
-            
-            # Calcula los puntajes de validación cruzada
-            score_cv = cross_val_score(clf, X_train, y_train, cv=cv)
-            
-            score_best.append((criterio, max_profundidad, max(score_cv)))
-            score_worse.append((criterio, max_profundidad, min(score_cv)))
-            score_mean.append((criterio, max_profundidad, score_cv.mean()))
-            
-            # Entrena el clasificador en el conjunto de entrenamiento
-            clf.fit(X_train, y_train)
-            
-            # Realiza predicciones en el conjunto de prueba
-            y_pred = clf.predict(X_test)
-            
-            # Genera el informe de clasificación
-            report = classification_report(y_test, y_pred, target_names=class_names, output_dict=True)
-            classification_reports.append(report)
-    
-    score_best = pd.DataFrame(score_best, columns=["criterion", "max_depth", "score"])
-    score_worse = pd.DataFrame(score_worse, columns=["criterion", "max_depth", "score"])
-    score_mean = pd.DataFrame(score_mean, columns=["criterion", "max_depth", "score"])
-    
-    return score_best, score_worse, score_mean, classification_reports
 
 hyper_params = {"criterion": ["gini", "entropy"],
                 "max_depth": [5,7,10,11,20,50],
@@ -692,31 +647,11 @@ ax1.set_title("Puntajes de CrossValidation del modelo")
 ax1.grid()
 
 plt.show()
-
+#%%
 # Filtrar los informes por criterio
 gini_reports = [report for i, report in enumerate(classification_reports) if gini_mask[i]]
 entropy_reports = [report for i, report in enumerate(classification_reports) if entropy_mask[i]]
 
-# Función para imprimir un informe de clasificación con formato personalizado
-def print_classification_report_custom(report, class_names):
-    print("Classification report rebuilt from confusion matrix:")
-    header = ["precision", "recall", "f1-score", "support"]
-    line = "{:<10} " + "{:<10} " * (len(header) - 1)
-    print(line.format("", *header))
-
-    for i, class_name in enumerate(class_names):
-        line_data = [report[class_name][metric] for metric in header]
-        print(line.format(class_name, *line_data))
-
-    accuracy = report["accuracy"]
-    macro_avg = report["macro avg"]
-    weighted_avg = report["weighted avg"]
-
-    line_data = [accuracy, macro_avg["precision"], macro_avg["recall"], macro_avg["f1-score"], macro_avg["support"]]
-    print(line.format("accuracy", *line_data))
-
-    line_data = [weighted_avg["precision"], weighted_avg["recall"], weighted_avg["f1-score"], weighted_avg["support"]]
-    print(line.format("weighted avg", *line_data))
 
 # Imprimir los informes de clasificación para el peor caso, el mejor caso y un caso medio en gini
 print("Informe de clasificación (gini) - Peor Caso")
@@ -756,7 +691,7 @@ save_classification_report_to_csv(entropy_reports[worst_entropy_idx], class_name
 save_classification_report_to_csv(entropy_reports[best_entropy_idx], class_names, "./reportes_clasificacion/best_entropy_report_correlacion.csv")
 save_classification_report_to_csv(entropy_reports[mean_entropy_idx], class_names, "./reportes_clasificacion/mean_entropy_report_correlacion.csv")
 #%% aca arranca el modelo por regiones
-#%% A cada prenda arquetipica le resto el promedio de todas las prendas arquetipicas, sin contar esta. Los pixeles de mayor valor
+#A cada prenda arquetipica le resto el promedio de todas las prendas arquetipicas, sin contar esta. Los pixeles de mayor valor
 # me muestran las zonas mas representativas de la prenda arquetipica, mientras que los de menor valor muestran las menos representativas.
 
 def regiones_de_interes(n):
@@ -864,54 +799,6 @@ from sklearn.model_selection import cross_val_score
 from sklearn.metrics import classification_report
 import pandas as pd
 
-def evaluate_model(model, X_train, X_test, y_train, y_test, hyperparameters, cv):
-    # Listas para almacenar los resultados
-    score_best = []
-    score_worse = []
-    score_mean = []
-    classification_reports = []
-    
-    class_names = [
-        "remera",
-        "pantalon",
-        "pullover",
-        "vestidos",
-        "camperas",
-        "sandalias",
-        "camisetas",
-        "zapatillas",
-        "bolsos",
-        "botas"
-    ]
-    
-    for criterio in hyperparameters["criterion"]:
-        for max_profundidad in hyperparameters["max_depth"]:
-            params = {"criterion": criterio, "max_depth": max_profundidad, "random_state": 5}
-            clf = model(**params)
-            
-            # Calcula los puntajes de validación cruzada
-            score_cv = cross_val_score(clf, X_train, y_train, cv=cv)
-            
-            score_best.append((criterio, max_profundidad, max(score_cv)))
-            score_worse.append((criterio, max_profundidad, min(score_cv)))
-            score_mean.append((criterio, max_profundidad, score_cv.mean()))
-            
-            # Entrena el clasificador en el conjunto de entrenamiento
-            clf.fit(X_train, y_train)
-            
-            # Realiza predicciones en el conjunto de prueba
-            y_pred = clf.predict(X_test)
-            
-            # Genera el informe de clasificación
-            report = classification_report(y_test, y_pred, target_names=class_names, output_dict=True)
-            classification_reports.append(report)
-    
-    score_best = pd.DataFrame(score_best, columns=["criterion", "max_depth", "score"])
-    score_worse = pd.DataFrame(score_worse, columns=["criterion", "max_depth", "score"])
-    score_mean = pd.DataFrame(score_mean, columns=["criterion", "max_depth", "score"])
-    
-    return score_best, score_worse, score_mean, classification_reports
-
 hyper_params = {"criterion": ["gini", "entropy"],
                 "max_depth": [5,7,10,11,20,50],
                 }
@@ -990,26 +877,6 @@ plt.show()
 gini_reports = [report for i, report in enumerate(classification_reports) if gini_mask[i]]
 entropy_reports = [report for i, report in enumerate(classification_reports) if entropy_mask[i]]
 
-# Función para imprimir un informe de clasificación con formato personalizado
-def print_classification_report_custom(report, class_names):
-    print("Classification report rebuilt from confusion matrix:")
-    header = ["precision", "recall", "f1-score", "support"]
-    line = "{:<10} " + "{:<10} " * (len(header) - 1)
-    print(line.format("", *header))
-
-    for i, class_name in enumerate(class_names):
-        line_data = [report[class_name][metric] for metric in header]
-        print(line.format(class_name, *line_data))
-
-    accuracy = report["accuracy"]
-    macro_avg = report["macro avg"]
-    weighted_avg = report["weighted avg"]
-
-    line_data = [accuracy, macro_avg["precision"], macro_avg["recall"], macro_avg["f1-score"], macro_avg["support"]]
-    print(line.format("accuracy", *line_data))
-
-    line_data = [weighted_avg["precision"], weighted_avg["recall"], weighted_avg["f1-score"], weighted_avg["support"]]
-    print(line.format("weighted avg", *line_data))
 
 # Imprimir los informes de clasificación para el peor caso, el mejor caso y un caso medio en gini
 print("Informe de clasificación (gini) - Peor Caso")
