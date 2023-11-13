@@ -163,9 +163,6 @@ print(f"mejor score {search.best_score_}")
 #hay entre un arbol de 11 y 5 de altura hay una diferencia de 0.01 en
 #score, verifico las curvas roc y la evolucion de rendimiento
 
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import classification_report
-import pandas as pd
 
 #%%
 def evaluate_model(model, X_train, X_test, y_train, y_test, hyperparameters, cv):
@@ -294,13 +291,19 @@ ax1.set_xlabel("Profundidad máxima del árbol")
 ax1.set_ylabel("Performance")
 ax1.set_title("Puntajes de CrossValidation del modelo")
 ax1.grid()
-
+plt.savefig('.\modelo-multiclase\Clasificacion-distancia-evaluacion.png')
 plt.show()
 #%%
 # Filtrar los informes por criterio
 gini_reports = [report for i, report in enumerate(classification_reports) if gini_mask[i]]
 entropy_reports = [report for i, report in enumerate(classification_reports) if entropy_mask[i]]
+worst_gini_idx = np.argmin(score_worse[gini_mask]["score"])
+best_gini_idx = np.argmax(score_best[gini_mask]["score"])
+mean_gini_idx = np.argmax(score_mean[gini_mask]["score"])
 
+worst_entropy_idx = np.argmin(score_worse[entropy_mask]["score"])
+best_entropy_idx = np.argmax(score_best[entropy_mask]["score"])
+mean_entropy_idx = np.argmax(score_mean[entropy_mask]["score"])
 # Función para imprimir un informe de clasificación con formato personalizado
 def print_classification_report_custom(report, class_names):
     print("Classification report rebuilt from confusion matrix:")
@@ -645,6 +648,7 @@ ax1.set_xlabel("Profundidad máxima del árbol")
 ax1.set_ylabel("Performance")
 ax1.set_title("Puntajes de CrossValidation del modelo")
 ax1.grid()
+plt.savefig('.\modelo-multiclase\Clasificacion-correlacion-evaluacion.png')
 
 plt.show()
 #%%
@@ -652,6 +656,13 @@ plt.show()
 gini_reports = [report for i, report in enumerate(classification_reports) if gini_mask[i]]
 entropy_reports = [report for i, report in enumerate(classification_reports) if entropy_mask[i]]
 
+worst_gini_idx = np.argmin(score_worse[gini_mask]["score"])
+best_gini_idx = np.argmax(score_best[gini_mask]["score"])
+mean_gini_idx = np.argmax(score_mean[gini_mask]["score"])
+
+worst_entropy_idx = np.argmin(score_worse[entropy_mask]["score"])
+best_entropy_idx = np.argmax(score_best[entropy_mask]["score"])
+mean_entropy_idx = np.argmax(score_mean[entropy_mask]["score"])
 
 # Imprimir los informes de clasificación para el peor caso, el mejor caso y un caso medio en gini
 print("Informe de clasificación (gini) - Peor Caso")
@@ -871,12 +882,19 @@ ax1.set_xlabel("Profundidad máxima del árbol")
 ax1.set_ylabel("Performance")
 ax1.set_title("Puntajes de CrossValidation del modelo")
 ax1.grid()
+plt.savefig('.\modelo-multiclase\Clasificacion-regiones-evaluacion.png')
 
 plt.show()
 # Filtrar los informes por criterio
 gini_reports = [report for i, report in enumerate(classification_reports) if gini_mask[i]]
 entropy_reports = [report for i, report in enumerate(classification_reports) if entropy_mask[i]]
+worst_gini_idx = np.argmin(score_worse[gini_mask]["score"])
+best_gini_idx = np.argmax(score_best[gini_mask]["score"])
+mean_gini_idx = np.argmax(score_mean[gini_mask]["score"])
 
+worst_entropy_idx = np.argmin(score_worse[entropy_mask]["score"])
+best_entropy_idx = np.argmax(score_best[entropy_mask]["score"])
+mean_entropy_idx = np.argmax(score_mean[entropy_mask]["score"])
 
 # Imprimir los informes de clasificación para el peor caso, el mejor caso y un caso medio en gini
 print("Informe de clasificación (gini) - Peor Caso")
@@ -915,3 +933,4 @@ save_classification_report_to_csv(gini_reports[mean_gini_idx], class_names, "./r
 save_classification_report_to_csv(entropy_reports[worst_entropy_idx], class_names, "./reportes_clasificacion/worst_entropy_report_regionescsv")
 save_classification_report_to_csv(entropy_reports[best_entropy_idx], class_names, "./reportes_clasificacion/best_entropy_report_regiones.csv")
 save_classification_report_to_csv(entropy_reports[mean_entropy_idx], class_names, "./reportes_clasificacion/mean_entropy_report_regiones.csv")
+#%%
