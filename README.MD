@@ -2,9 +2,7 @@
 Repositorios tp2 de labo de datos: regresion y clasificacion
 Orden de lectura
 Exploracion de datos
-Modelo de clasifiacion pantalon remera
-Modelo de clasificacion multiclase
-
+club_pinguin_fashion
 #utilidades
 Limpieza de datos
 
